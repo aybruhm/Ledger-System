@@ -91,7 +91,6 @@ class AccountToUserTransfer(views.APIView):
     
     
 class GetUserBalance(views.APIView):
-    serializer_class = UserSerializer
     
     def get(self, request:HttpRequest, user:int) -> response.Response:
         """
@@ -104,13 +103,12 @@ class GetUserBalance(views.APIView):
         :return: A response object
         """
         
-        user_accounts = Account.objects.filter(user=user)\
-            .aggregate(Sum("available_amount"))
+        user_accounts = Account.objects.filter(user=user).aggregate(Sum("available_amount"))
         
         payload = success_response(
             status="success",
             message="Your total balance is ₦{}"\
-                .format(user_accounts["sum__user_accounts"]),
+                .format(user_accounts["available_amount__sum"]),
             data={}
         )
         return response.Response(data=payload, status=status.HTTP_202_ACCEPTED)
