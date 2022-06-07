@@ -5,7 +5,7 @@ from django.http import HttpRequest
 from rest_framework import views, response, status
 
 # App Imports
-from ledger.serializers import AccountSerializer, UserSerializer, TransactAccount
+from ledger.serializers import AccountSerializer, UserSerializer, CreateTransactionSerializer
 from ledger.models import Account
 
 # Third Part Imports
@@ -13,7 +13,7 @@ from rest_api_payload import success_response, error_response
 
 
 class Deposit(views.APIView):
-    serializer_class = TransactAccount
+    serializer_class = CreateTransactionSerializer
     
     def post(self, request:HttpRequest) -> response.Response:
         """
@@ -60,3 +60,10 @@ class Deposit(views.APIView):
                 message=serializer.errors
             )
             return response.Response(data=payload, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+class Withdraw(views.APIView):
+    serilizer_class = CreateTransactionSerializer
+    
+    def post(self, request:HttpRequest) -> response.Response:
+        pass
