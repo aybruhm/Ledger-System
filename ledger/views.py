@@ -126,7 +126,7 @@ class GetAccountBalance(views.APIView):
         payload = success_response(
             status="success",
             message="You have ₦{} in your wallet."\
-                .format(serializer.data.get("available_amount")),
+                .format(account.available_amount),
             data=serializer.data
         )
         return response.Response(data=payload, status=status.HTTP_202_ACCEPTED)
