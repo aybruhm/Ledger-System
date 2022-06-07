@@ -70,10 +70,59 @@ class Deposit(views.APIView):
         
         
 class Withdraw(views.APIView):
-    serilizer_class = CreateTransactionSerializer
+    serializer_class = CreateTransactionSerializer
     
     def post(self, request:HttpRequest) -> response.Response:
-        pass
+        """
+        > It validates the data sent in the request, checks if the transaction type is `withdraw`, 
+        gets the user's account, subtracts the amount from the available amount, 
+        saves the serialized data and returns a success response
+        
+        :param request: This is the request object that is sent to the view
+        :type request: HttpRequest
+        :return: A response object
+        """
+        serializer = self.serializer_class(data=request.data)
+        
+        if serializer.is_valid():
+            
+            if serializer.validated_data.get("type") == "withdraw":
+            
+                # Get validated data
+                account_name = serializer.validated_data.get("account")
+                amount = serializer.validated_data.get("amount")
+                account_user = serializer.validated_data.get("user")
+                
+                # Get user account and subtract amount from available amount
+                user_account = Account.objects.get(name=account_name, user=account_user)
+                user_account.available_amount -= amount
+                user_account.save()
+                
+                # Save serialized data
+                serializer.save()
+                
+                payload = success_response(
+                    status="success",
+                    message="₦{} has been deducted from {} account!".format(amount, account_name),
+                    data=serializer.data
+                )
+                return response.Response(data=payload, status=status.HTTP_201_CREATED)
+
+            else:
+                
+                payload = error_response(
+                    status="error",
+                    message="Wrong transaction type!"
+                )
+                return response.Response(data=payload, status=status.HTTP_400_BAD_REQUEST)
+        
+        else:
+            
+            payload = error_response(
+                status="error",
+                message=serializer.errors
+            )
+            return response.Response(data=payload, status=status.HTTP_400_BAD_REQUEST)
     
     
 class AccountToAccountTransfer(views.APIView):
