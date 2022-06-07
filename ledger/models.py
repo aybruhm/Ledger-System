@@ -59,7 +59,7 @@ class Transaction(TimeStampModel):
     def save(self, *args, **kwargs):
         
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = slugify(self.account.name)
         
         super(Transaction, self).save(*args, **kwargs)
         
