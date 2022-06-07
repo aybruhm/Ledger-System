@@ -33,15 +33,21 @@ class Deposit(views.APIView):
             if serializer.validated_data.get("type") == "deposit":
             
                 # Get validated data
-                account_name = serializer.validated_data.get("name")
+                account_name = serializer.validated_data.get("account")
                 amount = serializer.validated_data.get("amount")
+                account_user = serializer.validated_data.get("user")
+                
+                # Get user account and update available amount
+                user_account = Account.objects.get(name=account_name, user=account_user)
+                user_account.available_amount += amount
+                user_account.save()
                 
                 # Save serialized data
                 serializer.save()
                 
                 payload = success_response(
                     status="success",
-                    message="₦{} has been deposited to {} account!".format(account_name, amount),
+                    message="₦{} has been deposited to {} account!".format(amount, account_name),
                     data=serializer.data
                 )
                 return response.Response(data=payload, status=status.HTTP_201_CREATED)
