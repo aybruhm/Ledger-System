@@ -1,4 +1,5 @@
 # Django Imports
+from django.db.models import Sum
 from django.http import HttpRequest
 
 # Rest Framework Imports
@@ -67,3 +68,103 @@ class Withdraw(views.APIView):
     
     def post(self, request:HttpRequest) -> response.Response:
         pass
+    
+    
+class AccountToAccountTransfer(views.APIView):
+    serializer_class = CreateTransactionSerializer
+    
+    def post(self, request:HttpRequest) -> response.Response:
+        pass
+    
+
+class AccountToUserTransfer(views.APIView):
+    serializer_class = CreateTransactionSerializer
+    
+    def post(self, request:HttpRequest) -> response.Response:
+        pass
+    
+    
+class GetUserBalance(views.APIView):
+    serializer_class = UserSerializer
+    
+    def get(self, request:HttpRequest, user:int) -> response.Response:
+        """
+        It returns the total balance of all accounts belonging to a user
+        
+        :param request: This is the request object that is passed to the view
+        :type request: HttpRequest
+        :param user: The user id of the user whose balance is being requested
+        :type user: int
+        :return: A response object
+        """
+        
+        user_accounts = Account.objects.filter(user=user)\
+            .aggregate(Sum("available_amount"))
+        
+        payload = success_response(
+            status="success",
+            message="Your total balance is ₦{}"\
+                .format(user_accounts["sum__user_accounts"]),
+            data={}
+        )
+        return response.Response(data=payload, status=status.HTTP_202_ACCEPTED)
+    
+
+class GetAccountBalance(views.APIView):
+    serializer_class = AccountSerializer
+    
+    def get(self, request:HttpRequest, name:str, user:int) -> response.Response:
+        account = Account.objects.get(name=name, user=user)
+        serializer = self.serializer_class(account)
+        
+        payload = success_response(
+            status="success",
+            message="You have ₦{} in your wallet."\
+                .format(serializer.data.get("available_amount")),
+            data=serializer.data
+        )
+        return response.Response(data=payload, status=status.HTTP_202_ACCEPTED)
+    
+    
+class CreateUser(views.APIView):
+    serializer_class = UserSerializer
+    
+    def post(self, request:HttpRequest) -> response.Response:
+        serializer = self.serializer_class(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            payload = success_response(
+                status="success",
+                message="User creation was a successful!",
+                data=serializer.data
+            )
+            return response.Response(data=payload, status=status.HTTP_201_CREATED)
+        
+        payload = error_response(
+            status="error", message=serializer.errors
+        )
+        return response.Response(data=payload, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class CreateUserAccount(views.APIView):
+    serializer_class = AccountSerializer
+    
+    def post(self, request:HttpRequest) -> response.Response:
+        serializer = self.serializer_class(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            payload = success_response(
+                status="success",
+                message="Account creation was a success!",
+                data=serializer.data
+            )
+            return response.Response(data=payload, status=status.HTTP_202_ACCEPTED)
+        
+        payload = error_response(
+            status="error", message=serializer.errors
+        )
+        return response.Response(data=payload, status=status.HTTP_400_BAD_REQUEST)
