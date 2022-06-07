@@ -18,22 +18,19 @@ class User(TimeStampModel):
         verbose_name_plural = "Users"
         db_table = "users"
       
-
-class TransactionTypes(models.TextChoices):
-    DEPOSIT = "deposit", "desposit" 
-    WITHDRAW = "withdraw", "withdraw"
-    TRANSFER = "transfer", "transfer"
-    
-    class Meta:
-        db_table = "transaction_types"
-     
         
 class Account(TimeStampModel):
-    name = models.CharField(max_length=255, unqiue=True)
+    
+    TRANSACTION_TYPES = (
+        ("deposit", "desposit"),
+        ("withdraw", "withdraw"),
+        ("transfer", "transfer")
+    )
+    name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     available_amount = models.FloatField(default=0.0)
-    type = models.CharField(choices=TransactionTypes, max_length=10)
+    type = models.CharField(choices=TRANSACTION_TYPES, max_length=10)
     
     def __str__(self) -> str:
         return "Account for {}".format(self.name)
