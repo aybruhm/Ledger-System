@@ -9,7 +9,7 @@ class CreateTransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transaction
-        fields = ("account", "to_account", "user", "amount", "type")
+        fields = ("account", "to_account", "user", "to_user", "amount", "type")
         
 
 class AccountSerializer(serializers.ModelSerializer):
