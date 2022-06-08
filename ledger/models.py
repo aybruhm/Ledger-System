@@ -21,7 +21,6 @@ class User(TimeStampModel):
             
 class Account(TimeStampModel):
     name = models.CharField(max_length=255, unique=True)
-    slug = models.SlugField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     available_amount = models.FloatField(default=0.0)
     
@@ -31,7 +30,7 @@ class Account(TimeStampModel):
     def save(self, *args, **kwargs):
         
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.name = slugify(self.name)
         
         super(Account, self).save(*args, **kwargs)
         
