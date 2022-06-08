@@ -25,11 +25,11 @@ class Account(TimeStampModel):
     available_amount = models.FloatField(default=0.0)
     
     def __str__(self) -> str:
-        return self.name
+        return "{} - {}".format(self.name, self.user.username)
           
     def save(self, *args, **kwargs):
         
-        if not self.slug:
+        if self.name:
             self.name = slugify(self.name)
         
         super(Account, self).save(*args, **kwargs)
@@ -49,7 +49,8 @@ class Transaction(TimeStampModel):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, help_text="sender", null=True)
     to_account = models.ForeignKey(Account, on_delete=models.CASCADE, help_text="receiver", null=True, related_name="transfer_to")
     slug = models.SlugField(null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="sender", null=True)
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="receiver", null=True, related_name="to_user")
     amount = models.FloatField(default=0.0)
     type = models.CharField(choices=TRANSACTION_TYPES, max_length=10)
     
