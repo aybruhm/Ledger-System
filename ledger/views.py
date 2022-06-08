@@ -34,7 +34,7 @@ class LedgerAPI(views.APIView):
                 "logout": BASE_URL + "api-auth/logout/",
                 "deposit": BASE_URL + "api/deposit/",
                 "withdraw": BASE_URL + "api/withdraw/",
-                "account-user": BASE_URL + "api/account-to-user-transfer/<str:user_account/",
+                "account-user": BASE_URL + "api/account-to-user-transfer/<str:user_account/<int:to_user>/",
                 "account-account": BASE_URL + "api/account-to-account-transfer/",
                 "create-user-account": BASE_URL +"api/create-user-account/",
                 "user-balance": BASE_URL + "api/user-balance/",
