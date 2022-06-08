@@ -48,6 +48,8 @@ class Transaction(TimeStampModel):
         ("transfer", "transfer")
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    from_account = models.ForeignKey(Account, on_delete=models.CASCADE, help_text="sender", null=True, related_name="transfer_from")
+    to_account = models.ForeignKey(Account, on_delete=models.CASCADE, help_text="receiver", null=True, related_name="transfer_to")
     slug = models.SlugField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.FloatField(default=0.0)
