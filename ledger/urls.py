@@ -2,8 +2,8 @@
 from django.urls import path
 
 # App Imports
-from ledger.views import Deposit, Withdraw, CreateUserAccount, \
-    AccountToUserTransfer, CreateUser,\
+from ledger.views import LedgerAPI, Deposit, Withdraw, CreateUserAccount, \
+    AccountToAccountTransfer, AccountToUserTransfer, CreateUser,\
     GetUserBalance, GetAccountBalance
 
 
@@ -11,9 +11,11 @@ app_name = "ledger"
 
 
 urlpatterns = [
+    path("", LedgerAPI.as_view(), name="ledger"),
     path("deposit/", Deposit.as_view(), name="deposit"),
     path("withdraw/", Withdraw.as_view(), name="withdraw"),
-    path("account-to-user-transfer/", AccountToUserTransfer.as_view(), name="account-to-user-transfer"),
+    path("account-to-user-transfer/<int:send_user>/<str:user_account>/", AccountToUserTransfer.as_view(), name="account-to-user-transfer"),
+    path("account-to-account-transfer/", AccountToAccountTransfer.as_view(), name="account-to-user-transfer"),
     path("create-user-account/", CreateUserAccount.as_view(), name="create-account"),
     path("create-user/", CreateUser.as_view(), name="create-user"),
     path("user-balance/<int:user>/", GetUserBalance.as_view(), name="user-balance"),
