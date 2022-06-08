@@ -5,6 +5,13 @@ from rest_framework import serializers
 from ledger.models import Transaction, User, Account
 
 
+class DepositWithdrawTransactionSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Transaction
+        fields = ("account", "amount", "type")
+
+
 class CreateTransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -29,7 +36,7 @@ class AccountSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Account
-        fields = ("id", "name", "user")
+        fields = ("id", "name",)
         
 
 class UserSerializer(serializers.ModelSerializer):

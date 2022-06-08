@@ -1,6 +1,7 @@
 # Django Imports
 from django.db import models
 from django.contrib.auth.models import User
+from django.forms import ValidationError
 from django.utils.text import slugify
 
 # App Imports
@@ -19,6 +20,12 @@ class Account(TimeStampModel):
         
         if self.name:
             self.name = slugify(self.name)
+        
+         
+        user_accounts = Account.objects.filter(user=self.user)
+        
+        if user_accounts.count() > 10:
+            raise ValidationError("You can only have 10 accounts!")
         
         super(Account, self).save(*args, **kwargs)
         
@@ -48,4 +55,4 @@ class Transaction(TimeStampModel):
     class Meta:
         verbose_name_plural = "User Transactions"
         db_table = "transactions"
-        
+    
