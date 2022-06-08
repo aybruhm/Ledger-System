@@ -8,8 +8,8 @@ from django.http import HttpRequest
 from rest_framework import views, response, status
 
 # App Imports
-from ledger.serializers import AccountSerializer, UserSerializer, \
-    TransferTransactionSerializer, CreateTransactionSerializer, \
+from ledger.serializers import AccountSerializer, TransferUserTransactionSerializer, UserSerializer, \
+    TransferTransactionSerializer, \
         DepositWithdrawTransactionSerializer
 from ledger.models import Account, User
 
@@ -33,11 +33,11 @@ class LedgerAPI(views.APIView):
                 "logout": BASE_URL + "api-auth/logout/",
                 "deposit": BASE_URL + "api/deposit/",
                 "withdraw": BASE_URL + "api/withdraw/",
-                "account-user": BASE_URL + " api/account-to-user-transfer/<int:send_user>/<str:user_account/",
+                "account-user": BASE_URL + "api/account-to-user-transfer/<str:user_account/",
                 "account-account": BASE_URL + "api/account-to-account-transfer/",
-                "create-user-account": BASE_URL + "api/create-user-account/",
-                "user-balance": BASE_URL + "api/user-balance/<int:user>/",
-                "account-balance": BASE_URL + "api/account-balance/<str:name>/<int:user>/",
+                "create-user-account": BASE_URL +"api/create-user-account/",
+                "user-balance": BASE_URL + "api/user-balance/",
+                "account-balance": BASE_URL + "api/account-balance/<str:name>/",
             },
         }
         return response.Response(data=welcome_data, status=status.HTTP_200_OK)
@@ -154,12 +154,12 @@ class Withdraw(views.APIView):
     
     
 class AccountToUserTransfer(views.APIView):
-    serializer_class = TransferTransactionSerializer
+    serializer_class = TransferUserTransactionSerializer
     
-    def get_user_account(self, send_user:int, user_account:str):
+    def get_user_account(self, request, user_account:str):
         
         try:
-            user_account = Account.objects.get(name=user_account, user=send_user)
+            user_account = Account.objects.get(name=user_account, user=request.user)
             return user_account
         except Exception:
             payload = error_response(
@@ -168,8 +168,8 @@ class AccountToUserTransfer(views.APIView):
             )
             return response.Response(data=payload, status=status.HTTP_400_BAD_REQUEST)
     
-    def get(self, request, send_user:int, user_account:str):
-        user_account =  self.get_user_account(send_user=send_user, user_account=user_account)
+    def get(self, request, user_account:str):
+        user_account =  self.get_user_account(send_user=request.user, user_account=user_account)
         serializer = AccountSerializer(user_account)
         
         payload = success_response(
