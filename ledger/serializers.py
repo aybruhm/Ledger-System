@@ -12,11 +12,11 @@ class DepositWithdrawTransactionSerializer(serializers.ModelSerializer):
         fields = ("account", "amount", "type")
 
 
-class CreateTransactionSerializer(serializers.ModelSerializer):
+class TransferUserTransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transaction
-        fields = ("account", "to_account", "user", "to_user", "amount", "type")
+        fields = ("account", "amount", "type")
         
 
 class TransferTransactionSerializer(serializers.ModelSerializer):
