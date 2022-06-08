@@ -2,6 +2,7 @@
 import json
 from typing import final
 from django.db.models import Sum
+from django.contrib.auth.models import User
 from django.http import HttpRequest
 
 # Rest Framework Imports
@@ -11,7 +12,7 @@ from rest_framework import views, response, status
 from ledger.serializers import AccountSerializer, TransferUserTransactionSerializer, UserSerializer, \
     TransferTransactionSerializer, \
         DepositWithdrawTransactionSerializer
-from ledger.models import Account, User
+from ledger.models import Account
 
 # Third Part Imports
 from rest_api_payload import success_response, error_response
@@ -156,10 +157,10 @@ class Withdraw(views.APIView):
 class AccountToUserTransfer(views.APIView):
     serializer_class = TransferUserTransactionSerializer
     
-    def get_user_account(self, request, user_account:str):
+    def get_user_account(self, user_account:str):
         
         try:
-            user_account = Account.objects.get(name=user_account, user=request.user)
+            user_account = Account.objects.get(name=user_account)   
             return user_account
         except Exception:
             payload = error_response(
@@ -168,49 +169,56 @@ class AccountToUserTransfer(views.APIView):
             )
             return response.Response(data=payload, status=status.HTTP_400_BAD_REQUEST)
     
-    def get(self, request, user_account:str):
-        user_account =  self.get_user_account(send_user=request.user, user_account=user_account)
+    def get(self, request, to_user:int, user_account:str):
+        user_account =  self.get_user_account(user_account=user_account)
         serializer = AccountSerializer(user_account)
         
         payload = success_response(
-            status="success", message="200 ok",
+            status="success", message="This account belongs to {}!"\
+                .format(User.objects.get(id=to_user)),
             data=serializer.data
         )
         return response.Response(data=payload)
     
-    def post(self, request:HttpRequest, send_user:int, user_account:str) -> response.Response:
+    def post(self, request:HttpRequest, to_user:int, user_account:str) -> response.Response:
         serializer = self.serializer_class(data=request.data)
         
         if serializer.is_valid():
                 
             if serializer.validated_data.get("type") == "transfer":
             
-                # Get from account
-                from_account = self.get_user_account(send_user=send_user, user_account=user_account)
+                # Get receiver data
+                from_account_name = serializer.validated_data.get("account")
+                from_account_user = request.user
                 
-                # Get validated data
-                to_account_name = serializer.validated_data.get("to_account")
-                to_account_user = serializer.validated_data.get("to_user")
+                # Get send (logged in) data 
+                to_account_name = user_account
+                to_account_user = User.objects.get(id=to_user)
                 
+                # Get amount
                 amount = serializer.validated_data.get("amount")
                 
-                # Get account to send money from
-                sender_account = Account.objects.get(name=from_account.name, user=from_account.user)
+                # Get send account, deduct amount from available amomut and save to database
+                sender_account = Account.objects.get(name=from_account_name, user=from_account_user)
                 sender_account.available_amount -= amount
                 sender_account.save()
                 
-                # Get account to receive money 
+                # Get receiver account, add amount to available amount and save to database
                 receiver_account = Account.objects.get(name=to_account_name, user=to_account_user)
                 receiver_account.available_amount += amount
                 receiver_account.save()
                 
                 # Save serialized data
-                serializer.save()
+                serializer.save(
+                    user=request.user,
+                    to_user=to_account_user,
+                    to_account=Account.objects.get(name=user_account)
+                )
                 
                 payload = success_response(
                     status="success",
                     message="₦{} has been transferred from {}'s {} account to {}'s {} account!"\
-                        .format(amount, from_account.user, from_account.name, to_account_user, to_account_name),
+                        .format(amount, from_account_user, from_account_name, to_account_user, to_account_name),
                     data=serializer.data
                 )
                 return response.Response(data=payload, status=status.HTTP_201_CREATED)
