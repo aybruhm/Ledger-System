@@ -23,13 +23,7 @@ class TransferTransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transaction
-        fields = ("to_account", "to_user", "amount", "type")
-        
-    def validate_from_user_accounts(self, value):
-        pass
-    
-    def validate_to_user_account(self, value):
-        pass
+        fields = ("account", "to_account", "amount", "type")
 
 
 class AccountSerializer(serializers.ModelSerializer):

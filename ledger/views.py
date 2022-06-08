@@ -233,7 +233,7 @@ class AccountToUserTransfer(views.APIView):
     
 
 class AccountToAccountTransfer(views.APIView):
-    serializer_class = CreateTransactionSerializer
+    serializer_class = TransferTransactionSerializer
     
     def post(self, request:HttpRequest) -> response.Response:
         serializer = self.serializer_class(data=request.data)
@@ -246,20 +246,19 @@ class AccountToAccountTransfer(views.APIView):
                 from_account_name = serializer.validated_data.get("account")
                 to_account_name = serializer.validated_data.get("to_account")
                 amount = serializer.validated_data.get("amount")
-                account_user = serializer.validated_data.get("user")
                 
                 # Get account to send money from
-                sender_account = Account.objects.get(name=from_account_name, user=account_user)
+                sender_account = Account.objects.get(name=from_account_name, user=request.user)
                 sender_account.available_amount -= amount
                 sender_account.save()
                 
                 # Get account to receive money 
-                receiver_account = Account.objects.get(name=to_account_name, user=account_user)
+                receiver_account = Account.objects.get(name=to_account_name, user=request.user)
                 receiver_account.available_amount += amount
                 receiver_account.save()
                 
                 # Save serialized data
-                serializer.save()
+                serializer.save(user=request.user, to_user=request.user)
                 
                 payload = success_response(
                     status="success",
