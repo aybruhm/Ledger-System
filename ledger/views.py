@@ -288,18 +288,16 @@ class AccountToAccountTransfer(views.APIView):
     
 class GetUserBalance(views.APIView):
     
-    def get(self, request:HttpRequest, user:int) -> response.Response:
+    def get(self, request:HttpRequest) -> response.Response:
         """
-        It returns the total balance of all accounts belonging to a user
+        It gets the sum of all the available amounts of all the accounts of the user making the request
         
         :param request: This is the request object that is passed to the view
         :type request: HttpRequest
-        :param user: The user id of the user whose balance is being requested
-        :type user: int
         :return: A response object
         """
         
-        user_accounts = Account.objects.filter(user=user).aggregate(Sum("available_amount"))
+        user_accounts = Account.objects.filter(user=request.user).aggregate(Sum("available_amount"))
         
         payload = success_response(
             status="success",
@@ -314,6 +312,16 @@ class GetAccountBalance(views.APIView):
     serializer_class = AccountSerializer
     
     def get(self, request:HttpRequest, name:str) -> response.Response:
+        """
+        > It gets the account of the user with the name `name` and returns a response with the
+        serialized account data
+        
+        :param request: This is the request object that is passed to the view
+        :type request: HttpRequest
+        :param name: The name of the account to be retrieved
+        :type name: str
+        :return: A response object.
+        """
         account = Account.objects.get(name=name, user=request.user)
         serializer = self.serializer_class(account)
         

@@ -17,6 +17,6 @@ urlpatterns = [
     path("account-to-user-transfer/<int:send_user>/<str:user_account>/", AccountToUserTransfer.as_view(), name="account-to-user-transfer"),
     path("account-to-account-transfer/", AccountToAccountTransfer.as_view(), name="account-to-user-transfer"),
     path("create-user-account/", CreateUserAccount.as_view(), name="create-account"),
-    path("user-balance/<int:user>/", GetUserBalance.as_view(), name="user-balance"),
+    path("user-balance/", GetUserBalance.as_view(), name="user-balance"),
     path("account-balance/<str:name>/", GetAccountBalance.as_view(), name="account-balance"),
 ]
