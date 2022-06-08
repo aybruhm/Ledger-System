@@ -1,22 +1,10 @@
 # Django Imports
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils.text import slugify
 
 # App Imports
 from ledger.timestamps import TimeStampModel
-
-
-class User(TimeStampModel):
-    firstname = models.CharField(max_length=255)
-    lastname = models.CharField(max_length=255)
-    username = models.CharField(max_length=100, unique=True)
-    
-    def __str__(self) -> str:
-        return "{} {}".format(self.firstname, self.lastname)
-
-    class Meta:
-        verbose_name_plural = "Users"
-        db_table = "users"
            
             
 class Account(TimeStampModel):
@@ -55,14 +43,7 @@ class Transaction(TimeStampModel):
     type = models.CharField(choices=TRANSACTION_TYPES, max_length=10)
     
     def __str__(self) -> str:
-        return "Transaction for {}".format(self.account.name)
-    
-    def save(self, *args, **kwargs):
-        
-        if not self.slug:
-            self.slug = slugify(self.account.name)
-        
-        super(Transaction, self).save(*args, **kwargs)
+        return "{}'s transaction".format(self.account)
         
     class Meta:
         verbose_name_plural = "User Transactions"
