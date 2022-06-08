@@ -25,7 +25,7 @@ class Account(TimeStampModel):
     available_amount = models.FloatField(default=0.0)
     
     def __str__(self) -> str:
-        return "{} - {}".format(self.name, self.user.username)
+        return self.name
           
     def save(self, *args, **kwargs):
         
