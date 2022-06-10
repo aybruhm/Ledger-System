@@ -49,8 +49,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    #Local apps
     'ledger.apps.LedgerConfig',
     
+    #3rd-Party apps
     'rest_framework'
 ]
 
